@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  height: 100%;
+  display: block;
+  margin: 0;
+  background: linear-gradient(180deg, #f6f6f6 0%, #fbf8f4 100%);
+  @apply font-balsamiq;
+}
+
+.hidden {
+  display: none !important;
+}
