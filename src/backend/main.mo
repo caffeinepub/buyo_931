@@ -7,8 +7,6 @@ import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
 import Char "mo:core/Char";
 
-
-
 actor {
   type Family = {
     name : Text;

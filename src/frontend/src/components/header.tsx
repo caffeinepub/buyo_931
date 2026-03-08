@@ -13,6 +13,7 @@ export interface HeaderProps {
   backhandler: () => void;
   buttonBlurred: boolean;
   subtitle?: string;
+  onSignOut?: () => void;
 }
 
 export const Header = ({
@@ -22,6 +23,7 @@ export const Header = ({
   backhandler,
   buttonBlurred,
   subtitle,
+  onSignOut,
 }: HeaderProps) => {
   return (
     <div className="mb-[24px] sm:mb-[10px] flex justify-between items-center gap-[10px]">
@@ -43,10 +45,24 @@ export const Header = ({
             <LogoIcon className="w-[108px] relative z-[4]" />
           )}
         </h2>
-        {subtitle && (
-          <p className="text-[12px] text-[#7C7D7D] leading-none -mt-1 truncate whitespace-nowrap overflow-hidden">
-            {subtitle}
-          </p>
+        {(subtitle || onSignOut) && (
+          <div className="flex items-center gap-2 -mt-1">
+            {subtitle && (
+              <p className="text-[12px] text-[#7C7D7D] leading-none truncate whitespace-nowrap overflow-hidden">
+                {subtitle}
+              </p>
+            )}
+            {onSignOut && (
+              <button
+                type="button"
+                data-ocid="header.sign_out_button"
+                onClick={onSignOut}
+                className="text-[11px] text-[#BD7760] hover:text-[#A8664F] font-medium leading-none whitespace-nowrap cursor-pointer transition-colors"
+              >
+                Sign out
+              </button>
+            )}
+          </div>
         )}
       </div>
       {buttons.length > 0 && (

@@ -51,13 +51,46 @@ import {
 import { ButtonType, type FamilySession, Screen } from "./types";
 import { getFooterMarkup, getHeaderMarkup, share } from "./utils";
 
+const SESSION_KEY = "buyo_session";
+
+type PersistedSession =
+  | { type: "single" }
+  | { type: "family"; familyName: string; memberName: string };
+
+function loadPersistedSession(): PersistedSession | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PersistedSession;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(session: PersistedSession | null) {
+  if (session === null) {
+    localStorage.removeItem(SESSION_KEY);
+  } else {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  }
+}
+
 export const App = () => {
   const { actor, isFetching: isActorFetching } = useActor();
   const queryClient = useQueryClient();
   const isDesktop = useIsDesktop();
 
   const [familySession, setFamilySession] = useState<FamilySession | null>(
-    null,
+    () => {
+      const persisted = loadPersistedSession();
+      if (persisted?.type === "family") {
+        return {
+          familyName: persisted.familyName,
+          memberName: persisted.memberName,
+        };
+      }
+      return null;
+    },
   );
 
   const [editedItems, setEditedItems] = useState<ShoppingListItemResponse[]>(
@@ -77,7 +110,12 @@ export const App = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const [screen, setScreen] = useState(Screen.ONBOARDING);
+  const [screen, setScreen] = useState<Screen>(() => {
+    const persisted = loadPersistedSession();
+    if (persisted?.type === "family") return Screen.LIST;
+    if (persisted?.type === "single") return Screen.START;
+    return Screen.ONBOARDING;
+  });
   const [listId, setListId] = useState<bigint | null>(null);
   const [listItemsToDelete, setListItemsToDelete] = useState<
     bigint | undefined
@@ -351,6 +389,14 @@ export const App = () => {
     }
   }, [isDesktop, screen, filteredLists, listId]);
 
+  const handleSignOut = () => {
+    saveSession(null);
+    setFamilySession(null);
+    setScreen(Screen.ONBOARDING);
+    setListId(null);
+    queryClient.clear();
+  };
+
   const headerSubtitle = familySession
     ? `${familySession.familyName} · ${familySession.memberName}`
     : undefined;
@@ -360,8 +406,16 @@ export const App = () => {
       return (
         <Onboarding
           actor={actor}
-          onSingleList={() => setScreen(Screen.START)}
+          onSingleList={() => {
+            saveSession({ type: "single" });
+            setScreen(Screen.START);
+          }}
           onFamilyJoined={(session: FamilySession) => {
+            saveSession({
+              type: "family",
+              familyName: session.familyName,
+              memberName: session.memberName,
+            });
             setFamilySession(session);
             setScreen(Screen.LIST);
           }}
@@ -696,6 +750,7 @@ export const App = () => {
               isEmpty,
             )}
             subtitle={headerSubtitle}
+            onSignOut={handleSignOut}
             backhandler={() => {
               setScreen(Screen.LIST);
               setIsCompleted(false);

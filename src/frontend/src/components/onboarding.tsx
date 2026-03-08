@@ -86,25 +86,13 @@ export const Onboarding = ({
     }
   };
 
-  const handleConfirmName = async (e: React.FormEvent) => {
+  const handleConfirmName = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!actor || !memberName.trim()) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (flowType === "make") {
-        await actor.initFamilyCatalog(familyName.trim());
-      }
-      onFamilyJoined({
-        familyName: familyName.trim(),
-        memberName: memberName.trim(),
-      });
-    } catch (_err) {
-      setError(
-        "Something went wrong setting up your family list. Please try again.",
-      );
-      setIsLoading(false);
-    }
+    if (!memberName.trim()) return;
+    onFamilyJoined({
+      familyName: familyName.trim(),
+      memberName: memberName.trim(),
+    });
   };
 
   return (
@@ -545,16 +533,10 @@ export const Onboarding = ({
                   <button
                     data-ocid="onboarding.confirm_name_button"
                     type="submit"
-                    disabled={isLoading || !memberName.trim()}
+                    disabled={!memberName.trim()}
                     className="w-full rounded-[12px] bg-[#BD7760] text-white font-bold py-3 text-[15px] disabled:opacity-50 hover:bg-[#A8664F] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                   >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Setting up…
-                      </>
-                    ) : (
-                      "Let's Shop! 🛒"
-                    )}
+                    Let's Shop! 🛒
                   </button>
                 </form>
               </div>
